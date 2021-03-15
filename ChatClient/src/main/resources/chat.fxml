@@ -7,7 +7,12 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="ru.chat.ChatController">
     <children>
-        <MenuBar>
+        <HBox fx:id="authPanel">
+            <TextField fx:id="loginField" promptText="login" HBox.hgrow="ALWAYS"/>
+            <PasswordField fx:id="passField" promptText="password" HBox.hgrow="ALWAYS"/>
+            <Button onAction="#sendAuth" text="connect" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <MenuBar fx:id="menuBar" visible="false">
             <Menu text="Main">
                 <MenuItem text="Login" onAction="#login"/>
                 <MenuItem text="Logout" onAction="#logout"/>
@@ -19,16 +24,14 @@
             </Menu>
         </MenuBar>
 
-        <HBox VBox.vgrow="ALWAYS">
+        <HBox VBox.vgrow="ALWAYS" visible="false" fx:id="chatBox">
             <ListView fx:id="usersOnline" prefWidth="200"/>
             <TextArea HBox.hgrow="ALWAYS" fx:id="chatArea" VBox.vgrow="ALWAYS" editable="false"/>
         </HBox>
-        <HBox>
-
+        <HBox visible="false" fx:id="inputBox">
             <TextField HBox.hgrow="ALWAYS" fx:id="textMessage" onAction="#pressEnter" prefHeight="30"/>
             <Button fx:id="btnSendMessage" text="SEND" prefHeight="30" prefWidth="100" onAction="#btnSend"/>
         </HBox>
-
 
     </children>
 </VBox>

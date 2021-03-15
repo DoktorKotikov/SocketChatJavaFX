@@ -5,18 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.chat</groupId>
-    <artifactId>ChatCommon</artifactId>
+    <artifactId>ChatClientNetwork</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.6</version>
-        </dependency>
-    </dependencies>
+
 </project>
