@@ -38,6 +38,14 @@ public class ChatServer {
         }
     }
 
+    public synchronized void privateMessage(MessageDTO dto){
+        for (ClientHandler clientHandler : clientHandlers) {
+            if(dto.getTo().equals(clientHandler.getUser()) || dto.getFrom().equals(clientHandler.getUser())){
+                clientHandler.sendMessage(dto);
+            }
+        }
+    }
+
     public synchronized void subscribe(ClientHandler c) {
         clientHandlers.add(c);
     }

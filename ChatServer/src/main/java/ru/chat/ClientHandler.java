@@ -2,7 +2,6 @@ package ru.chat;
 
 import ru.chat.messages.MessageDTO;
 import ru.chat.messages.MessageType;
-import sun.security.x509.IPAddressName;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -52,10 +51,12 @@ public class ClientHandler {
                 String msg = inputStream.readUTF();
                 MessageDTO dto = MessageDTO.convertFromJson(msg);
                 dto.setFrom(user);
-
                 switch (dto.getMessageType()) {
                     case PUBLIC_MESSAGE:
                         chatServer.broadcastMEssage(dto);
+                        break;
+                    case PRIVATE_MESSAGE:
+                        chatServer.privateMessage(dto);
                         break;
                 }
             }
@@ -88,6 +89,10 @@ public class ClientHandler {
         } catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    public String getUser() {
+        return user;
     }
 
     public void closeHandler(){
