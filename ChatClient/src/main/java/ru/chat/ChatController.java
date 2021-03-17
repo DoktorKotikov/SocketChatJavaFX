@@ -73,12 +73,20 @@ public class ChatController implements Initializable, MessageProcessor {
         String msg = textMessage.getText();
         if (msg.length() > 0) {
             MessageDTO dto = new MessageDTO();
-            dto.setMessageType(MessageType.PUBLIC_MESSAGE);
-            dto.setBody(msg);
+            if(msg.startsWith("/w")) {
+                dto.setMessageType(MessageType.PRIVATE_MESSAGE);
+                String array[] = msg.split(" ", 3);
+                dto.setTo(array[1]);
+                dto.setBody(array[2]);
+            } else {
+                dto.setMessageType(MessageType.PUBLIC_MESSAGE);
+                dto.setBody(msg);
+            }
             messageService.sendMessage(dto.convertToJson());//тут отправляем текст
             textMessage.clear();
         }
     }
+
 
     private void showBroadcastMessage(String message) {chatArea.appendText(message + System.lineSeparator());}
 
@@ -89,6 +97,9 @@ public class ChatController implements Initializable, MessageProcessor {
             case PUBLIC_MESSAGE:
                 showBroadcastMessage(dto.getFrom() + " " + dto.getBody()) ;
                 break;
+            case PRIVATE_MESSAGE:
+                showBroadcastMessage("Private mess from " + dto.getFrom() + " to " + dto.getTo() + " :" + dto.getBody()) ;
+                break;
             case AUTH_CONFIRM:
                 authPanel.setVisible(false);
                 chatBox.setVisible(true);
@@ -98,7 +109,7 @@ public class ChatController implements Initializable, MessageProcessor {
             case ERROR_MESSAGE:
                 showError(dto);
                 break;
-        };
+        }
     }
 
     public void sendAuth(ActionEvent actionEvent) {
