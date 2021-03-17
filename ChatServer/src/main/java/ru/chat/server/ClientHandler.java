@@ -1,4 +1,4 @@
-package ru.chat;
+package ru.chat.server;
 
 import ru.chat.messages.MessageDTO;
 import ru.chat.messages.MessageType;
@@ -14,7 +14,7 @@ public class ClientHandler {
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
     private ChatServer chatServer;
-    private String user;
+    private String currentUserName;
     //создаем клиента
     public ClientHandler(Socket socket, ChatServer chatServer){
         try{
@@ -24,8 +24,12 @@ public class ClientHandler {
             this.outputStream = new DataOutputStream(socket.getOutputStream());
 
             new Thread(() ->{
+                try {
                     authenticate();
                     readMessages();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }).start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,12 +49,12 @@ public class ClientHandler {
 
     }
     //читаем сообщение
-    private void readMessages() {
+    private void readMessages() throws IOException {
         try {
-            while (true) {
+            while (!Thread.currentThread().isInterrupted() || socket.isConnected()) {
                 String msg = inputStream.readUTF();
                 MessageDTO dto = MessageDTO.convertFromJson(msg);
-                dto.setFrom(user);
+                dto.setFrom(currentUserName);
                 switch (dto.getMessageType()) {
                     case PUBLIC_MESSAGE:
                         chatServer.broadcastMEssage(dto);
@@ -62,6 +66,9 @@ public class ClientHandler {
             }
         } catch (IOException e){
             e.printStackTrace();
+            Thread.currentThread().interrupt();
+        } finally {
+            closeHandler();
         }
     }
 
@@ -71,28 +78,34 @@ public class ClientHandler {
                 String authMessage = inputStream.readUTF();
                 MessageDTO dto = MessageDTO.convertFromJson(authMessage);
                 String username = chatServer.getAuthService().getUsernameByLoginPass(dto.getLogin(), dto.getPassword());
-                MessageDTO send = new MessageDTO();
+                MessageDTO response = new MessageDTO();
                 if (username == null) {
-                    send.setMessageType(MessageType.ERROR_MESSAGE);
-                    send.setBody("Wrong login or pass!");
-                    sendMessage(send);
-                } else {
-                    send.setMessageType(MessageType.AUTH_CONFIRM);
-                    send.setBody(username);
-                    user = username;
+                    response.setMessageType(MessageType.ERROR_MESSAGE);
+                    response.setBody("Wrong login or pass!");
+                } else if (chatServer.isUserBusy(username)){
+                    response.setMessageType(MessageType.ERROR_MESSAGE);
+                    response.setBody("Yu are clone");
+                    System.out.println("Clone");
+                }
+                else {
+                    response.setMessageType(MessageType.AUTH_CONFIRM);
+                    response.setBody(username);
+                    currentUserName = username;
                     chatServer.subscribe(this);
-                    sendMessage(send);
+                    sendMessage(response);
                     break;
                 }
+                sendMessage(response);
 
             }
         } catch (IOException e){
             e.printStackTrace();
+            closeHandler();
         }
     }
 
-    public String getUser() {
-        return user;
+    public String getcurrentUserName() {
+        return currentUserName;
     }
 
     public void closeHandler(){

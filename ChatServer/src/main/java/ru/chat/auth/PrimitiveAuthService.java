@@ -12,7 +12,11 @@ public class PrimitiveAuthService implements AuthService{
         clients = new ArrayList<>(Arrays.asList(
                 new Client("user1", "log1","pass1"),
                 new Client("user2", "log2","pass2"),
-                new Client("user3", "log3","pass3")
+                new Client("user3", "log3","pass3"),
+                new Client("user4", "log4","pass4"),
+                new Client("user5", "log5","pass5"),
+                new Client("user6", "log6","pass6")
+
         ));
     }
 

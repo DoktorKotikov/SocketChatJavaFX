@@ -1,5 +1,6 @@
 package ru.chat;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,6 +17,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class ChatController implements Initializable, MessageProcessor {
+    private final String ALL = "SEND TO ALL";
     @FXML
     public TextArea chatArea;
     @FXML
@@ -42,7 +44,6 @@ public class ChatController implements Initializable, MessageProcessor {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         messageService = new ChatMessageService("localhost", 65500, this);
-        usersOnline.setItems(FXCollections.observableArrayList("Vasya", "Petya", "Kolya"));
     }
 
     public void login(ActionEvent actionEvent) {
@@ -69,38 +70,64 @@ public class ChatController implements Initializable, MessageProcessor {
         sendMessage();
     }
 
+//    private void sendMessage(){
+//        String msg = textMessage.getText();
+//        if (msg.length() > 0) {
+//            MessageDTO dto = new MessageDTO();
+//            if(msg.startsWith("/w")) {
+//                dto.setMessageType(MessageType.PRIVATE_MESSAGE);
+//                String array[] = msg.split(" ", 3);
+//                dto.setTo(array[1]);
+//                dto.setBody(array[2]);
+//            } else {
+//                dto.setMessageType(MessageType.PUBLIC_MESSAGE);
+//                dto.setBody(msg);
+//            }
+//            messageService.sendMessage(dto.convertToJson());//тут отправляем текст
+//            textMessage.clear();
+//        }
+//    }
+
+    //метод отправки лс из урока
     private void sendMessage(){
         String msg = textMessage.getText();
-        if (msg.length() > 0) {
-            MessageDTO dto = new MessageDTO();
-            if(msg.startsWith("/w")) {
-                dto.setMessageType(MessageType.PRIVATE_MESSAGE);
-                String array[] = msg.split(" ", 3);
-                dto.setTo(array[1]);
-                dto.setBody(array[2]);
-            } else {
-                dto.setMessageType(MessageType.PUBLIC_MESSAGE);
-                dto.setBody(msg);
+        if (msg.length() == 0) return;
+        MessageDTO dto = new MessageDTO();
+        String selected = (String) usersOnline.getSelectionModel().getSelectedItem();
+        if (selected.equals(ALL)) dto.setMessageType(MessageType.PUBLIC_MESSAGE);
+        else {
+            dto.setMessageType(MessageType.PRIVATE_MESSAGE);
+            dto.setTo(selected);
             }
-            messageService.sendMessage(dto.convertToJson());//тут отправляем текст
-            textMessage.clear();
+        dto.setBody(msg);
+        messageService.sendMessage(dto.convertToJson());//тут отправляем текст
+        textMessage.clear();
         }
+
+
+
+    private void showMessage(MessageDTO message) {
+        String msg = String.format("[%s] [%s] -> %s\n",message.getMessageType(), message.getFrom(), message.getBody());
+        chatArea.appendText(msg);
     }
-
-
-    private void showBroadcastMessage(String message) {chatArea.appendText(message + System.lineSeparator());}
 
     @Override
     public void processMessage(String msg) {
         MessageDTO dto = MessageDTO.convertFromJson(msg);
         switch (dto.getMessageType()){
+
+//            case PRIVATE_MESSAGE:
+//                showBroadcastMessage("Private mess from " + dto.getFrom() + " to " + dto.getTo() + " :" + dto.getBody()) ;
+//                break;
             case PUBLIC_MESSAGE:
-                showBroadcastMessage(dto.getFrom() + " " + dto.getBody()) ;
-                break;
             case PRIVATE_MESSAGE:
-                showBroadcastMessage("Private mess from " + dto.getFrom() + " to " + dto.getTo() + " :" + dto.getBody()) ;
+                showMessage(dto) ;
+                break;
+            case CLIENTS_LIST_MESSAGE:
+                refreshUserList(dto);
                 break;
             case AUTH_CONFIRM:
+                App.getStage().setTitle(dto.getBody());
                 authPanel.setVisible(false);
                 chatBox.setVisible(true);
                 inputBox.setVisible(true);
@@ -130,7 +157,13 @@ public class ChatController implements Initializable, MessageProcessor {
         VBox dialog = new VBox();
         Label label = new Label("Trace:");
         TextArea textArea = new TextArea();
-        textArea.setText(e.getStackTrace()[0].toString());
+
+        StringBuilder builder = new StringBuilder();
+        for (StackTraceElement el : e.getStackTrace()){
+            builder.append(el).append(System.lineSeparator());
+        }
+
+        textArea.setText(builder.toString());
         dialog.getChildren().addAll(label, textArea);
         alert.getDialogPane().setContent(dialog);
         alert.showAndWait();
@@ -147,5 +180,11 @@ public class ChatController implements Initializable, MessageProcessor {
         dialog.getChildren().addAll(label, textArea);
         alert.getDialogPane().setContent(dialog);
         alert.showAndWait();
+    }
+
+    private void refreshUserList(MessageDTO dto){
+        dto.getUserOnline().add(0, ALL);
+        usersOnline.setItems(FXCollections.observableArrayList(dto.getUserOnline()));
+        usersOnline.getSelectionModel().selectFirst();
     }
 }

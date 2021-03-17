@@ -1,4 +1,4 @@
-package ru.chat;
+package ru.chat.delete;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

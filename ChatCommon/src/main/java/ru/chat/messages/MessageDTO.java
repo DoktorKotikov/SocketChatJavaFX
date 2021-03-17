@@ -2,6 +2,8 @@ package ru.chat.messages;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 public class MessageDTO {
     private String body;
     private MessageType messageType;
@@ -9,6 +11,7 @@ public class MessageDTO {
     private String password;
     private String to;
     private String from;
+    private List<String> userOnline;
 
     public static MessageDTO convertFromJson(String json){
         return new Gson().fromJson(json, MessageDTO.class);
@@ -64,5 +67,13 @@ public class MessageDTO {
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    public List<String> getUserOnline() {
+        return userOnline;
+    }
+
+    public void setUserOnline(List<String> userOnline) {
+        this.userOnline = userOnline;
     }
 }

@@ -17,7 +17,7 @@ public class NetworkService {
         this.inputStream = new DataInputStream(socket.getInputStream());
         this.outputStream = new DataOutputStream(socket.getOutputStream());
 
-        new Thread(() -> {
+        Thread t = new Thread(() -> {
             while (true){
                 try {
                     String msg = inputStream.readUTF();//читаем сообщение и пихаем в чат контроллер через messageService
@@ -27,7 +27,9 @@ public class NetworkService {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
+        t.setDaemon(true);
+        t.start();
 
     }
 

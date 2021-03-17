@@ -1,4 +1,4 @@
-package ru.chat;
+package ru.chat.delete;
 
 import javafx.application.Platform;
 

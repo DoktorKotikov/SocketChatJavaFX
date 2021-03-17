@@ -1,6 +1,5 @@
-package ru.chat;
+package ru.chat.delete;
 
-import java.awt.*;
 import java.io.IOException;
 import javafx.scene.control.TextArea;
 
