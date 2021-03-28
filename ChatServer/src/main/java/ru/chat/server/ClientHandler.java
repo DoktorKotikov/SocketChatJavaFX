@@ -9,17 +9,21 @@ import java.io.IOException;
 import java.net.Socket;
 
 //обработчик
+
 public class ClientHandler {
     private Socket socket;
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
     private ChatServer chatServer;
     private String currentUserName;
+
+    private static final int WAIT_TIME = 120000;
     //создаем клиента
     public ClientHandler(Socket socket, ChatServer chatServer){
         try{
             this.chatServer = chatServer;
             this.socket = socket;
+            this.socket.setSoTimeout(WAIT_TIME);
             this.inputStream = new DataInputStream(socket.getInputStream());
             this.outputStream = new DataOutputStream(socket.getOutputStream());
 
@@ -72,37 +76,43 @@ public class ClientHandler {
         }
     }
 
-    private void authenticate() {
-        try {
-            while (true) {
-                String authMessage = inputStream.readUTF();
-                MessageDTO dto = MessageDTO.convertFromJson(authMessage);
-                String username = chatServer.getAuthService().getUsernameByLoginPass(dto.getLogin(), dto.getPassword());
-                MessageDTO response = new MessageDTO();
-                if (username == null) {
-                    response.setMessageType(MessageType.ERROR_MESSAGE);
-                    response.setBody("Wrong login or pass!");
-                } else if (chatServer.isUserBusy(username)){
-                    response.setMessageType(MessageType.ERROR_MESSAGE);
-                    response.setBody("Yu are clone");
-                    System.out.println("Clone");
-                }
-                else {
-                    response.setMessageType(MessageType.AUTH_CONFIRM);
-                    response.setBody(username);
-                    currentUserName = username;
-                    chatServer.subscribe(this);
-                    sendMessage(response);
-                    break;
-                }
-                sendMessage(response);
 
+
+    private void authenticate() {
+            try {
+                while (true) {
+                    String authMessage = inputStream.readUTF();
+                    MessageDTO dto = MessageDTO.convertFromJson(authMessage);
+                    String username = chatServer.getAuthService().getUsernameByLoginPass(dto.getLogin(), dto.getPassword());
+                    MessageDTO response = new MessageDTO();
+                    if (username == null) {
+                        response.setMessageType(MessageType.ERROR_MESSAGE);
+                        response.setBody("Wrong login or pass!");
+                    } else if (chatServer.isUserBusy(username)){
+                        response.setMessageType(MessageType.ERROR_MESSAGE);
+                        response.setBody("Yu are clone");
+                        System.out.println("Clone");
+                    }
+                    else {
+                        response.setMessageType(MessageType.AUTH_CONFIRM);
+                        response.setBody(username);
+                        currentUserName = username;
+                        chatServer.subscribe(this);
+                        sendMessage(response);
+                        break;
+                    }
+                    sendMessage(response);
+
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+                closeHandler();
             }
-        } catch (IOException e){
-            e.printStackTrace();
-            closeHandler();
+
         }
-    }
+
+
+
 
     public String getcurrentUserName() {
         return currentUserName;

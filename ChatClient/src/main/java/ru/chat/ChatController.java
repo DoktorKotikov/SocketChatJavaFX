@@ -127,7 +127,7 @@ public class ChatController implements Initializable, MessageProcessor {
                 refreshUserList(dto);
                 break;
             case AUTH_CONFIRM:
-                App.getStage().setTitle(dto.getBody());
+                //App.getStage().setTitle(dto.getBody());
                 authPanel.setVisible(false);
                 chatBox.setVisible(true);
                 inputBox.setVisible(true);
