@@ -2,6 +2,7 @@ package ru.chat.server;
 
 import ru.chat.auth.AuthService;
 import ru.chat.auth.PrimitiveAuthService;
+import ru.chat.database.DBClass;
 import ru.chat.messages.MessageDTO;
 import ru.chat.messages.MessageType;
 
@@ -20,6 +21,7 @@ public class ChatServer {
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)){
             System.out.println("Server started");
+            DBClass.createInsertDbWithTestsUsers();
             authService = new PrimitiveAuthService();
             authService.start();
             onlineClientsList = new LinkedList<>();

@@ -1,5 +1,8 @@
 package ru.chat.auth;
 
+import ru.chat.database.DBClass;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,12 +12,20 @@ public class PrimitiveAuthService implements AuthService{
     private List<Client> clients;
 
     public PrimitiveAuthService() {
-        clients = new ArrayList<>(Arrays.asList(
-                new Client("user1", "log1","pass1"),
-                new Client("user2", "log2","pass2"),
-                new Client("user3", "log3","pass3")
 
-        ));
+        try {
+            refreshUsers();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+    }
+
+    private void refreshUsers() throws ClassNotFoundException, SQLException {
+        DBClass.connect();
+        clients = DBClass.readUsersForAuth();
     }
 
     @Override
@@ -29,9 +40,19 @@ public class PrimitiveAuthService implements AuthService{
 
     @Override
     public String getUsernameByLoginPass(String login, String pass) {
-        for (Client c : clients){
+        try {
+            refreshUsers();
+            for (Client c : clients){
             if (c.getLogin().equals(login) && c.getPassword().equals(pass)) return c.getUsername();
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
         return null;
     }
+
+
 }
