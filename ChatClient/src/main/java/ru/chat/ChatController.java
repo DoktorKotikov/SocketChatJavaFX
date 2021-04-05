@@ -13,6 +13,10 @@ import network.MessageProcessor;
 import ru.chat.messages.MessageDTO;
 import ru.chat.messages.MessageType;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -109,6 +113,16 @@ public class ChatController implements Initializable, MessageProcessor {
     private void showMessage(MessageDTO message) {
         String msg = String.format("[%s] [%s] -> %s\n",message.getMessageType(), message.getFrom(), message.getBody());
         chatArea.appendText(msg);
+        saveLogs(msg);
+    }
+
+    private void saveLogs(String msg) {
+        File logs = new File("logs.txt");
+        try (FileWriter fos = new FileWriter(logs, true)){
+            fos.write(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
