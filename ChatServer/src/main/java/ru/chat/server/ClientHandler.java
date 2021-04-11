@@ -7,6 +7,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 //обработчик
 
@@ -27,16 +29,29 @@ public class ClientHandler {
             this.inputStream = new DataInputStream(socket.getInputStream());
             this.outputStream = new DataOutputStream(socket.getOutputStream());
 
-            new Thread(() ->{
+            ExecutorService service = Executors.newSingleThreadExecutor();
+
+            service.execute(() ->{
                 try {
                     authenticate();
                     readMessages();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }).start();
+            });
+
+
+//            new Thread(() ->{
+//                try {
+//                    authenticate();
+//                    readMessages();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }).start();
         } catch (IOException e) {
             e.printStackTrace();
+
         }
 
 
